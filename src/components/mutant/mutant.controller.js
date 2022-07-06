@@ -1,4 +1,7 @@
-const DNA = ["ATGCAA", "AAGTGC", "ATATGT", "AGAAGG", "TCCCTA", "TCACTG"];
+//Client dynamoDB
+const dynamoclient = require('../../services/dynamodb');
+const TABLE_NAME = "DNA_MUTANT";
+const { uuid } = require('uuidv4');
 const numberLetters = 4;
 const RIGTH = 'RTGTH';
 const DOWN = 'DOWN';
@@ -12,7 +15,9 @@ var moveRigth = true;
 var moveDown = true;
 var moveObliqueRigth = true;
 var moveObliqueLeft = true;
-var isMutantReturn = false;
+var matrix = [[]];
+
+
 
 //Create a matrix of objects than contains the letter and its position in x and y.
 function createMatrix(dna) {
@@ -23,7 +28,7 @@ function createMatrix(dna) {
     })
     return matrix;
 }
-var matrix = createMatrix(DNA);
+
 
 function validationNextLetter(gen, nextGen, numberLetter, direction) {
     var validationDirection = direction === RIGTH ? moveRigth : direction === DOWN ? moveDown : direction === OBLIQUE_RIGTH ? moveObliqueRigth : moveObliqueLeft;
@@ -44,6 +49,19 @@ function validationNextLetter(gen, nextGen, numberLetter, direction) {
         direction === RIGTH ? moveRigth = false : direction === DOWN ? moveDown = false : direction === OBLIQUE_RIGTH ? moveObliqueRigth = false : moveObliqueLeft = false;
         return isMutant(currentx, currenty, numberLetters)
     }
+}
+
+function setMoves() {
+    moveRigth = true;
+    moveDown = true;
+    moveObliqueRigth = true;
+    moveObliqueLefth = true;
+}
+
+function setVars(){
+    currentx = 0;
+    currenty = 0;
+    numberGenesMutants = 0;
 }
 
 function isMutant(x, y, numberLetter) {
@@ -82,38 +100,76 @@ function isMutant(x, y, numberLetter) {
 
         if (currenty + 1 < matrix.length) {
             currenty++;
-            moveRigth = true;
-            moveDown = true;
-            moveObliqueRigth = true;
-            moveObliqueLefth = true;
+            setMoves();
             return isMutant(currentx, currenty, numberLetters)
         }
         else if (currentx + 1 < matrix.length) {
             currenty = 0;
-            moveRigth = true;
-            moveDown = true;
-            moveObliqueRigth = true;
-            moveObliqueLefth = true;
             currentx++;
+            setMoves();
             return isMutant(currentx, currenty, numberLetters)
         }
         else {
-            return isMutantReturn;
+            return false;
         }
     }
     catch (e) {
-        console.log(currentx)
-        console.log(currenty)
-        console.log(e)
+        console.log(e);
+        return new Error(e);
     }
 
 }
 
-
-console.log(isMutant(currentx, currenty, numberLetters));
-
 exports.mutant = async function (req, res) {
-    res.send(false)
+    try{
+        setVars();
+        const { dna } = req.body;
+        matrix = createMatrix(dna);
+        var mutant = isMutant(currentx, currenty, numberLetters);
+        dnaMutant = {
+           id: uuid(),
+           dna: dna,
+           mutant
+        }
+        const params = {
+            TableName: TABLE_NAME,
+            Item: dnaMutant,
+        };
+        console.log(params);
+        await dynamoclient.put(params).promise();
+        if(mutant){
+            res.status(200).json({
+                message: 'Is Mutant!'
+            })
+        }else{
+            res.status(403).json({
+                message: 'Is Human!'
+            })
+        }
+    }catch(e){
+        console.log(e);
+        res.status(500).send(e);
+    }
+}
+
+exports.stats = async function (req,res){
+    try{
+        const params = {
+            TableName: TABLE_NAME
+        };
+        const scan = await dynamoclient.scan(params).promise();
+        var count = scan.Items.reduce((acc,curr)=>{
+            if(curr.mutant){
+                acc.countMutant++;
+            }else{
+                acc.countHuman++;
+            }
+            return acc;
+        }, {countMutant:0, countHuman:0});
+        res.status(200).json({count_mutant_dna:count.countMutant, count_human_dna:count.countHuman, ratio:count.countMutant/count.countHuman}) ;
+    }catch(e){
+        res.status(500).send(e);
+    }
 }
 
 

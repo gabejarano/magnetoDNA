@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/bin/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +18,13 @@
   },
   "homepage": "https://github.com/gabejarano/magnetoDNA#readme",
   "dependencies": {
+    "aws-sdk": "^2.1169.0",
+    "config": "^3.3.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "jest": "^28.1.2",
