@@ -9,6 +9,11 @@ exports.mutant = async function (req, res) {
     try{
         const { dna } = req.body;
         var mutant = new Mutant(uuid(), dna);
+        mutant.matrix.map(row => {
+            if (row.length !== mutant.matrix.length) {
+                return res.status(400).json({ message: "DNA must be a square matrix" });
+            }
+        })
         var isMutant = mutant.isMutant(mutant.currentx, mutant.currenty, mutant.numberLetters);
         //Config item dynamoDB
         const params = {
@@ -17,17 +22,16 @@ exports.mutant = async function (req, res) {
         }
         await dynamoclient.put(params).promise();
         if(isMutant){
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'Is Mutant!'
             })
         }else{
-            res.status(403).json({
+            return res.status(403).json({
                 message: 'Is Human!'
             })
         }
     }catch(e){
-        console.log(e);
-        res.status(500).send(e);
+        console.log(e)
     }
 }
 

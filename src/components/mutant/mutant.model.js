@@ -52,11 +52,7 @@ class Mutant {
         var x= direction === this.RIGTH ? gen.x : direction === this.DOWN ? gen.x + 1 : direction === this.OBLIQUE_RIGTH ? gen.x + 1 : gen.x + 1;
         var y= direction === this.RIGTH ? gen.y + 1 : direction === this.DOWN ? gen.y : direction === this.OBLIQUE_RIGTH ? gen.y + 1 : gen.y - 1;
         if (gen.id === nextGen.id) {
-            
             if (numberLetter === 2) {
-                console.log(gen)
-                console.log(nextGen)
-                console.log(direction)
                 this.numberGenesMutants++;
                 if (this.numberGenesMutants > 1) {
                     this.flag=true;
