@@ -34,7 +34,7 @@ class Mutant {
         this.moveRigth = true;
         this.moveDown = true;
         this.moveObliqueRigth = true;
-        this.moveObliqueLefth = true;
+        this.moveObliqueLeft = true;
     }
 
     setVars() {
@@ -49,10 +49,14 @@ class Mutant {
 
     validationNextLetter(gen, nextGen, numberLetter, direction) {
         var validationDirection = direction === this.RIGTH ? this.moveRigth : direction === this.DOWN ? this.moveDown : direction === this.OBLIQUE_RIGTH ? this.moveObliqueRigth : this.moveObliqueLeft;
-        var x= direction === this.RIGTH ? gen.x : direction === this.DOWN ? gen.x + 1 : direction === this.OBLIQUE_RIGTH ? gen.x + 1 : gen.x - 1;
-        var y= direction === this.RIGTH ? gen.y + 1 : direction === this.DOWN ? gen.y : direction === this.OBLIQUE_RIGTH ? gen.y + 1 : gen.y + 1;
+        var x= direction === this.RIGTH ? gen.x : direction === this.DOWN ? gen.x + 1 : direction === this.OBLIQUE_RIGTH ? gen.x + 1 : gen.x + 1;
+        var y= direction === this.RIGTH ? gen.y + 1 : direction === this.DOWN ? gen.y : direction === this.OBLIQUE_RIGTH ? gen.y + 1 : gen.y - 1;
         if (gen.id === nextGen.id) {
+            
             if (numberLetter === 2) {
+                console.log(gen)
+                console.log(nextGen)
+                console.log(direction)
                 this.numberGenesMutants++;
                 if (this.numberGenesMutants > 1) {
                     this.flag=true;
@@ -98,7 +102,7 @@ class Mutant {
                 this.moveObliqueRigth = false;
             }
             //Validation obliqueLeft
-            if (gen.y + numberLetter <= this.matrix.length && gen.x - numberLetter >= 0 && this.moveObliqueLeft) {
+            if (gen.y - numberLetter >= 0 && gen.x + numberLetter <= this.matrix.length && this.moveObliqueLeft) {
                 return this.validationNextLetter(gen, genObliqueLeft, numberLetter, this.OBLIQUE_LEFT)
             } else {
                 this.moveObliqueLeft = false;
